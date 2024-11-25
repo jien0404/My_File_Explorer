@@ -32,7 +32,8 @@ public class DirectoryTree {
                     if (path != null) {
                         File selectedFile = (File) ((DefaultMutableTreeNode) path.getLastPathComponent()).getUserObject();
                         if (selectedFile.isDirectory()) {
-                            fileExplorer.pushToStack(rootDirectory);
+                            fileExplorer.pushToStack(fileExplorer.getCurrentDirectory());
+                            fileExplorer.setCurrentDirectory(selectedFile);
                             updateDirectoryTree(selectedFile);
                             fileExplorer.updatePathField(selectedFile.getAbsolutePath());
                         } else {
@@ -42,6 +43,7 @@ public class DirectoryTree {
                 }
             }
         });
+        
     }
 
     public JTree getTree() {

@@ -30,16 +30,17 @@ public class FileExplorer extends JFrame {
         backButton.setFont(new Font("Arial", Font.BOLD, 14));
         backButton.addActionListener(e -> {
             if (!directoryStack.isEmpty()) {
-                currentDirectory = directoryStack.pop();
-                directoryTree.updateDirectoryTree(currentDirectory);
-                updatePathField(currentDirectory != null ? currentDirectory.getAbsolutePath() : "My Computer");
+                currentDirectory = directoryStack.pop(); // Lấy thư mục trước đó từ ngăn xếp
+                directoryTree.updateDirectoryTree(currentDirectory); // Cập nhật cây thư mục
+                updatePathField(currentDirectory.getAbsolutePath()); // Cập nhật đường dẫn
             } else {
-                // Reset về danh sách ổ đĩa (My Computer)
+                // Ngăn xếp rỗng: quay về My Computer
                 currentDirectory = null;
                 directoryTree.updateDirectoryTree(null);
                 updatePathField("My Computer");
             }
         });
+        
     
         pathField = new JTextField("My Computer");
         pathField.setEditable(false);
@@ -62,6 +63,15 @@ public class FileExplorer extends JFrame {
     public void pushToStack(File directory) {
         directoryStack.push(directory);
     }
+
+    public File getCurrentDirectory() {
+        return currentDirectory;
+    }
+    
+    public void setCurrentDirectory(File directory) {
+        this.currentDirectory = directory;
+    }
+    
 
     private void setLookAndFeel() {
         try {
