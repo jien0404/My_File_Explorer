@@ -1,47 +1,61 @@
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.event.TreeSelectionListener; // Thêm dòng này
+import javax.swing.tree.TreePath;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 
-public class DirectoryTree extends JTree {
-    private DefaultMutableTreeNode rootNode;
+public class DirectoryTree {
+    private JTree tree;
+    private FileExplorer fileExplorer;
 
-    public DirectoryTree(File rootDirectory) {
-        rootNode = createTreeNode(rootDirectory);
-        setModel(new DefaultTreeModel(rootNode));
-    }
+    public DirectoryTree(File rootDirectory, FileExplorer fileExplorer) {
+        this.fileExplorer = fileExplorer;
+        tree = new JTree(createTreeNode(rootDirectory));
+        tree.addTreeSelectionListener(e -> {
+            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+            if (selectedNode != null) {
+                File selectedFile = (File) selectedNode.getUserObject();
+                fileExplorer.updateFileInfo(selectedFile.getAbsolutePath());
+            }
+        });
 
-    private DefaultMutableTreeNode createTreeNode(File directory) {
-        DefaultMutableTreeNode node = new DefaultMutableTreeNode(directory);
-        File[] files = directory.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(file);
-                node.add(childNode);
-                if (file.isDirectory()) {
-                    childNode.add(createTreeNode(file)); // Đệ quy thêm thư mục con
+        tree.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
+                    TreePath path = tree.getPathForLocation(e.getX(), e.getY());
+                    if (path != null) {
+                        File selectedFile = (File) ((DefaultMutableTreeNode) path.getLastPathComponent()).getUserObject();
+                        if (selectedFile.isDirectory()) {
+                            fileExplorer.pushToStack(rootDirectory);
+                            updateDirectoryTree(selectedFile);
+                        } else {
+                            FileOperations.openFile(selectedFile, fileExplorer);
+                        }
+                    }
                 }
             }
-        }
-        return node;
+        });
+    }
+
+    public JTree getTree() {
+        return tree;
     }
 
     public void updateDirectoryTree(File directory) {
-        rootNode = createTreeNode(directory);
-        setModel(new DefaultTreeModel(rootNode));
+        tree.setModel(new DefaultTreeModel(createTreeNode(directory)));
     }
 
-    public File getSelectedFile() {
-        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) getLastSelectedPathComponent();
-        if (selectedNode != null) {
-            return (File) selectedNode.getUserObject();
+    private DefaultMutableTreeNode createTreeNode(File directory) {
+        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(directory);
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                rootNode.add(new DefaultMutableTreeNode(file));
+            }
         }
-        return null;
-    }
-
-    // Thêm phương thức này để thêm TreeSelectionListener
-    public void addTreeSelectionListener(TreeSelectionListener listener) {
-        super.addTreeSelectionListener(listener);
+        return rootNode;
     }
 }
