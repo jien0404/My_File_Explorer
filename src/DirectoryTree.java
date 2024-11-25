@@ -50,18 +50,36 @@ public class DirectoryTree {
 
     public void updateDirectoryTree(File directory) {
         tree.setModel(new DefaultTreeModel(createTreeNode(directory)));
+        if (directory == null) {
+            fileExplorer.updatePathField("My Computer");
+        }
     }
+    
 
     private DefaultMutableTreeNode createTreeNode(File directory) {
-        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(directory);
-        File[] files = directory.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                rootNode.add(new DefaultMutableTreeNode(file));
+        DefaultMutableTreeNode rootNode;
+        if (directory == null) {
+            // Hiển thị danh sách ổ đĩa
+            rootNode = new DefaultMutableTreeNode("My Computer");
+            File[] roots = File.listRoots();
+            if (roots != null) {
+                for (File root : roots) {
+                    rootNode.add(new DefaultMutableTreeNode(root));
+                }
+            }
+        } else {
+            // Hiển thị nội dung thư mục
+            rootNode = new DefaultMutableTreeNode(directory);
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    rootNode.add(new DefaultMutableTreeNode(file));
+                }
             }
         }
         return rootNode;
     }
+    
 
     // Bộ renderer tùy chỉnh để hiển thị biểu tượng
     private static class CustomTreeCellRenderer extends DefaultTreeCellRenderer {

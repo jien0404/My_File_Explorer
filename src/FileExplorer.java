@@ -18,6 +18,10 @@ public class FileExplorer extends JFrame {
         setLocationRelativeTo(null);
         setLookAndFeel();
 
+        currentDirectory = null; // Bắt đầu ở danh sách ổ đĩa
+        directoryTree = new DirectoryTree(currentDirectory, this);
+
+
         directoryStack = new Stack<>();
 
         // Tạo cây thư mục
@@ -28,13 +32,26 @@ public class FileExplorer extends JFrame {
         JPanel navigationPanel = new JPanel(new BorderLayout());
         backButton = new JButton("← Back");
         backButton.setFont(new Font("Arial", Font.BOLD, 14));
+        // backButton.addActionListener(e -> {
+        //     if (!directoryStack.isEmpty()) {
+        //         currentDirectory = directoryStack.pop();
+        //         directoryTree.updateDirectoryTree(currentDirectory);
+        //         updatePathField(currentDirectory.getAbsolutePath());
+        //     }
+        // });
         backButton.addActionListener(e -> {
             if (!directoryStack.isEmpty()) {
                 currentDirectory = directoryStack.pop();
                 directoryTree.updateDirectoryTree(currentDirectory);
-                updatePathField(currentDirectory.getAbsolutePath());
+                updatePathField(currentDirectory != null ? currentDirectory.getAbsolutePath() : "My Computer");
+            } else {
+                // Reset về danh sách ổ đĩa
+                currentDirectory = null;
+                directoryTree.updateDirectoryTree(null);
+                updatePathField("My Computer");
             }
         });
+        
 
         pathField = new JTextField(currentDirectory.getAbsolutePath());
         pathField.setEditable(false);
