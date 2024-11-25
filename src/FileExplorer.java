@@ -30,21 +30,41 @@ public class FileExplorer extends JFrame {
         backButton.setFont(new Font("Arial", Font.BOLD, 14));
         backButton.addActionListener(e -> {
             if (!directoryStack.isEmpty()) {
-                currentDirectory = directoryStack.pop(); // Lấy thư mục trước đó từ ngăn xếp
-                directoryTree.updateDirectoryTree(currentDirectory); // Cập nhật cây thư mục
-                updatePathField(currentDirectory.getAbsolutePath()); // Cập nhật đường dẫn
+                currentDirectory = directoryStack.pop();
+                directoryTree.updateDirectoryTree(currentDirectory);
+                updatePathField(currentDirectory.getAbsolutePath());
             } else {
-                // Ngăn xếp rỗng: quay về My Computer
                 currentDirectory = null;
                 directoryTree.updateDirectoryTree(null);
                 updatePathField("My Computer");
             }
         });
-        
     
         pathField = new JTextField("My Computer");
-        pathField.setEditable(false);
+        pathField.setEditable(true); // Cho phép chỉnh sửa
         pathField.setFont(new Font("Consolas", Font.PLAIN, 14));
+
+        // Lắng nghe sự kiện Enter
+        pathField.addActionListener(e -> {
+            String enteredPath = pathField.getText().trim();
+            File enteredDirectory = new File(enteredPath);
+
+            if (enteredDirectory.exists() && enteredDirectory.isDirectory()) {
+                // Đường dẫn hợp lệ và là thư mục
+                pushToStack(currentDirectory); // Lưu thư mục hiện tại vào ngăn xếp
+                currentDirectory = enteredDirectory;
+                directoryTree.updateDirectoryTree(currentDirectory);
+                updatePathField(currentDirectory.getAbsolutePath());
+            } else {
+                // Hiển thị thông báo lỗi nếu đường dẫn không hợp lệ
+                JOptionPane.showMessageDialog(this, 
+                    "The entered path is invalid or not a directory:\n" + enteredPath, 
+                    "Invalid Path", 
+                    JOptionPane.ERROR_MESSAGE);
+                updatePathField(currentDirectory != null ? currentDirectory.getAbsolutePath() : "My Computer");
+            }
+        });
+
     
         navigationPanel.add(backButton, BorderLayout.WEST);
         navigationPanel.add(pathField, BorderLayout.CENTER);
@@ -58,7 +78,7 @@ public class FileExplorer extends JFrame {
 
     public void updatePathField(String path) {
         pathField.setText(path);
-    }
+    }    
 
     public void pushToStack(File directory) {
         directoryStack.push(directory);
