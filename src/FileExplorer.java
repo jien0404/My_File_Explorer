@@ -6,8 +6,7 @@ import java.util.Stack;
 
 public class FileExplorer extends JFrame {
     private DirectoryTree directoryTree;
-    private JTextArea fileInfoArea;
-    private JToolBar toolBar;
+    private JTextField pathField;
     private JButton backButton;
     private Stack<File> directoryStack;
     private File currentDirectory;
@@ -25,40 +24,33 @@ public class FileExplorer extends JFrame {
         currentDirectory = new File(System.getProperty("user.home"));
         directoryTree = new DirectoryTree(currentDirectory, this);
 
-        // Tạo khu vực hiển thị thông tin tệp
-        fileInfoArea = new JTextArea();
-        fileInfoArea.setEditable(false);
-        fileInfoArea.setFont(new Font("Consolas", Font.PLAIN, 14));
-        fileInfoArea.setLineWrap(true);
-        fileInfoArea.setWrapStyleWord(true);
-
-        // Tạo thanh công cụ (Toolbar)
-        toolBar = new JToolBar();
-        toolBar.setFloatable(false);
-
+        // Tạo thanh điều hướng (North)
+        JPanel navigationPanel = new JPanel(new BorderLayout());
         backButton = new JButton("← Back");
         backButton.setFont(new Font("Arial", Font.BOLD, 14));
         backButton.addActionListener(e -> {
             if (!directoryStack.isEmpty()) {
                 currentDirectory = directoryStack.pop();
                 directoryTree.updateDirectoryTree(currentDirectory);
+                updatePathField(currentDirectory.getAbsolutePath());
             }
         });
-        toolBar.add(backButton);
 
-        // Sử dụng JSplitPane để chia màn hình
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(directoryTree.getTree()), new JScrollPane(fileInfoArea));
-        splitPane.setDividerLocation(300);
-        splitPane.setResizeWeight(0.3);
+        pathField = new JTextField(currentDirectory.getAbsolutePath());
+        pathField.setEditable(false);
+        pathField.setFont(new Font("Consolas", Font.PLAIN, 14));
+
+        navigationPanel.add(backButton, BorderLayout.WEST);
+        navigationPanel.add(pathField, BorderLayout.CENTER);
 
         // Thêm các thành phần vào JFrame
         getContentPane().setLayout(new BorderLayout());
-        getContentPane().add(toolBar, BorderLayout.NORTH);
-        getContentPane().add(splitPane, BorderLayout.CENTER);
+        getContentPane().add(navigationPanel, BorderLayout.NORTH);
+        getContentPane().add(new JScrollPane(directoryTree.getTree()), BorderLayout.CENTER);
     }
 
-    public void updateFileInfo(String info) {
-        fileInfoArea.setText(info);
+    public void updatePathField(String path) {
+        pathField.setText(path);
     }
 
     public void pushToStack(File directory) {
