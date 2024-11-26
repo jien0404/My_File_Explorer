@@ -197,30 +197,49 @@ public class DirectoryTree {
             }
         }
     }
-    
+
     public void handleAddFile() {
         DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
         if (selectedNode != null) {
             File selectedFile = (File) selectedNode.getUserObject();
             if (selectedFile.isDirectory()) {
-                String newFileName = JOptionPane.showInputDialog("Enter name for new file:");
-                if (newFileName != null && !newFileName.trim().isEmpty()) {
-                    File newFile = new File(selectedFile, newFileName);
-                    try {
-                        if (newFile.createNewFile()) {
-                            JOptionPane.showMessageDialog(null, "File created successfully!");
-                            updateDirectoryTree(fileExplorer.getCurrentDirectory());
-                        } else {
-                            JOptionPane.showMessageDialog(null, "Failed to create file.");
+                // Danh sách các loại tệp
+                String[] fileTypes = {".txt", ".jpg", ".pdf", ".docx", ".png"};
+    
+                // Tạo JPanel để chứa các thành phần nhập liệu
+                JPanel panel = new JPanel(new GridLayout(2, 2));
+                JTextField fileNameField = new JTextField(15);
+                JComboBox<String> fileTypeComboBox = new JComboBox<>(fileTypes);
+    
+                panel.add(new JLabel("Enter name for new file (without extension):"));
+                panel.add(fileNameField);
+                panel.add(new JLabel("Select file type:"));
+                panel.add(fileTypeComboBox);
+    
+                int result = JOptionPane.showConfirmDialog(null, panel, "Create New File", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                if (result == JOptionPane.OK_OPTION) {
+                    String newFileName = fileNameField.getText().trim();
+                    String selectedType = (String) fileTypeComboBox.getSelectedItem();
+    
+                    if (!newFileName.isEmpty() && selectedType != null) {
+                        File newFile = new File(selectedFile, newFileName + selectedType);
+                        try {
+                            if (newFile.createNewFile()) {
+                                JOptionPane.showMessageDialog(null, "File created successfully!");
+                                updateDirectoryTree(fileExplorer.getCurrentDirectory());
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Failed to create file.");
+                            }
+                        } catch (Exception ex) {
+                            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
                         }
-                    } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Please enter a valid name for the file.");
                     }
                 }
             }
         }
     }
-    
 
     public void handleRename() {
         DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
