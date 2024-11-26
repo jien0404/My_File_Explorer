@@ -11,16 +11,15 @@ import java.io.File;
 public class DirectoryTree {
     private JTree tree;
     private FileExplorer fileExplorer;
+    private JPopupMenu contextMenu;
 
     public DirectoryTree(File rootDirectory, FileExplorer fileExplorer) {
         this.fileExplorer = fileExplorer;
-    
-        // Tạo JTree và áp dụng các tùy chỉnh
         tree = new JTree(createTreeNode(rootDirectory));
-        tree.setFont(new Font("Arial", Font.PLAIN, 18)); // Font lớn hơn
-        tree.setRowHeight(30); // Tăng chiều cao hàng
+        tree.setFont(new Font("Arial", Font.PLAIN, 18));
+        tree.setRowHeight(30);
         tree.setCellRenderer(new CustomTreeCellRenderer());
-    
+
         // Thêm các sự kiện
         tree.addTreeSelectionListener(e -> {
             DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
@@ -30,7 +29,40 @@ public class DirectoryTree {
             }
         });
     
+        // Tạo menu ngữ cảnh
+        contextMenu = new JPopupMenu();
+        JMenu addSubMenu = new JMenu("Add New");
+        addSubMenu.setIcon(loadIcon("/resources/icons/add.png", 20, 20));
+
+        JMenuItem addFolderMenuItem = new JMenuItem("Add Folder");
+        addFolderMenuItem.setIcon(loadIcon("/resources/icons/folder.png", 20, 20));
+
+        JMenuItem addFileMenuItem = new JMenuItem("Add File");
+        addFileMenuItem.setIcon(loadIcon("/resources/icons/file.png", 20, 20));
+
+        addSubMenu.add(addFolderMenuItem);
+        addSubMenu.add(addFileMenuItem);
+
+        JMenuItem renameMenuItem = new JMenuItem("Rename");
+        renameMenuItem.setIcon(loadIcon("resources\\icons\\rename.png", 20, 20));
+        JMenuItem deleteMenuItem = new JMenuItem("Delete");
+        deleteMenuItem.setIcon(loadIcon("resources\\icons\\delete.png", 20, 20));
+    
+        contextMenu.add(addSubMenu);
+        contextMenu.add(renameMenuItem);
+        contextMenu.add(deleteMenuItem);
+    
+        // Thêm sự kiện chuột phải
         tree.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    int row = tree.getClosestRowForLocation(e.getX(), e.getY());
+                    tree.setSelectionRow(row);
+                    contextMenu.show(tree, e.getX(), e.getY());
+                }
+            }
+
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
@@ -49,7 +81,14 @@ public class DirectoryTree {
                 }
             }
         });
-    }    
+    
+        // Xử lý hành động
+        addFolderMenuItem.addActionListener(e -> handleAddFolder());
+        addFileMenuItem.addActionListener(e -> handleAddFile());
+        renameMenuItem.addActionListener(e -> handleRename());
+        deleteMenuItem.addActionListener(e -> handleDelete());
+    }
+        
 
     public JTree getTree() {
         return tree;
@@ -87,6 +126,17 @@ public class DirectoryTree {
         return rootNode;
     }
     
+    private Icon loadIcon(String path, int width, int height) {
+        try {
+            ImageIcon originalIcon = new ImageIcon(getClass().getResource(path));
+            Image scaledImage = originalIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            return new ImageIcon(scaledImage);
+        } catch (Exception e) {
+            System.err.println("Error loading icon: " + path);
+            return null;
+        }
+    }
+    
 
     // Bộ renderer tùy chỉnh để hiển thị biểu tượng
     private static class CustomTreeCellRenderer extends DefaultTreeCellRenderer {
@@ -118,6 +168,94 @@ public class DirectoryTree {
             }
             return c;
         }
+    }
+    
+    private void handleAddFolder() {
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+        if (selectedNode != null) {
+            File selectedFile = (File) selectedNode.getUserObject();
+            if (selectedFile.isDirectory()) {
+                String newFolderName = JOptionPane.showInputDialog("Enter name for new folder:");
+                if (newFolderName != null && !newFolderName.trim().isEmpty()) {
+                    File newFolder = new File(selectedFile, newFolderName);
+                    if (newFolder.mkdir()) {
+                        JOptionPane.showMessageDialog(null, "Folder created successfully!");
+                        updateDirectoryTree(fileExplorer.getCurrentDirectory());
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Failed to create folder.");
+                    }
+                }
+            }
+        }
+    }
+    
+    private void handleAddFile() {
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+        if (selectedNode != null) {
+            File selectedFile = (File) selectedNode.getUserObject();
+            if (selectedFile.isDirectory()) {
+                String newFileName = JOptionPane.showInputDialog("Enter name for new file:");
+                if (newFileName != null && !newFileName.trim().isEmpty()) {
+                    File newFile = new File(selectedFile, newFileName);
+                    try {
+                        if (newFile.createNewFile()) {
+                            JOptionPane.showMessageDialog(null, "File created successfully!");
+                            updateDirectoryTree(fileExplorer.getCurrentDirectory());
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Failed to create file.");
+                        }
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+                    }
+                }
+            }
+        }
+    }
+    
+
+    private void handleRename() {
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+        if (selectedNode != null) {
+            File selectedFile = (File) selectedNode.getUserObject();
+            String newName = JOptionPane.showInputDialog("Enter new name:", selectedFile.getName());
+            if (newName != null && !newName.trim().isEmpty()) {
+                File renamedFile = new File(selectedFile.getParent(), newName);
+                if (selectedFile.renameTo(renamedFile)) {
+                    JOptionPane.showMessageDialog(null, "Renamed successfully!");
+                    updateDirectoryTree(fileExplorer.getCurrentDirectory());
+                } else {
+                    JOptionPane.showMessageDialog(null, "Failed to rename.");
+                }
+            }
+        }
+    }
+
+    private void handleDelete() {
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+        if (selectedNode != null) {
+            File selectedFile = (File) selectedNode.getUserObject();
+            int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                if (deleteRecursively(selectedFile)) {
+                    JOptionPane.showMessageDialog(null, "Deleted successfully!");
+                    updateDirectoryTree(fileExplorer.getCurrentDirectory());
+                } else {
+                    JOptionPane.showMessageDialog(null, "Failed to delete.");
+                }
+            }
+        }
+    }
+    
+    private boolean deleteRecursively(File file) {
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    deleteRecursively(f);
+                }
+            }
+        }
+        return file.delete();
     }
     
 }
