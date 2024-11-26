@@ -14,8 +14,14 @@ public class DirectoryTree {
 
     public DirectoryTree(File rootDirectory, FileExplorer fileExplorer) {
         this.fileExplorer = fileExplorer;
+    
+        // Tạo JTree và áp dụng các tùy chỉnh
         tree = new JTree(createTreeNode(rootDirectory));
+        tree.setFont(new Font("Arial", Font.PLAIN, 18)); // Font lớn hơn
+        tree.setRowHeight(30); // Tăng chiều cao hàng
         tree.setCellRenderer(new CustomTreeCellRenderer());
+    
+        // Thêm các sự kiện
         tree.addTreeSelectionListener(e -> {
             DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
             if (selectedNode != null) {
@@ -23,7 +29,7 @@ public class DirectoryTree {
                 fileExplorer.updatePathField(selectedFile.getAbsolutePath());
             }
         });
-
+    
         tree.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -43,8 +49,7 @@ public class DirectoryTree {
                 }
             }
         });
-        
-    }
+    }    
 
     public JTree getTree() {
         return tree;
@@ -85,22 +90,34 @@ public class DirectoryTree {
 
     // Bộ renderer tùy chỉnh để hiển thị biểu tượng
     private static class CustomTreeCellRenderer extends DefaultTreeCellRenderer {
-        private final Icon folderIcon = UIManager.getIcon("FileView.directoryIcon");
-        private final Icon fileIcon = UIManager.getIcon("FileView.fileIcon");
-
+        private final Icon folderIcon = scaleIcon(UIManager.getIcon("FileView.directoryIcon"), 24);
+        private final Icon fileIcon = scaleIcon(UIManager.getIcon("FileView.fileIcon"), 24);
+    
+        // Phương thức scale icon
+        private static Icon scaleIcon(Icon icon, int size) {
+            if (icon instanceof ImageIcon) {
+                Image img = ((ImageIcon) icon).getImage();
+                Image newImg = img.getScaledInstance(size, size, Image.SCALE_SMOOTH); // Scale icon
+                return new ImageIcon(newImg);
+            }
+            return icon;
+        }
+    
         @Override
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
             Component c = super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-
+    
+            // Lấy thông tin node để hiển thị icon phù hợp
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
             if (node.getUserObject() instanceof File file) {
                 if (file.isDirectory()) {
-                    setIcon(folderIcon);
+                    setIcon(folderIcon); // Icon thư mục
                 } else {
-                    setIcon(fileIcon);
+                    setIcon(fileIcon); // Icon tập tin
                 }
             }
             return c;
         }
     }
+    
 }

@@ -12,7 +12,7 @@ public class FileExplorer extends JFrame {
     private File currentDirectory;
 
     public FileExplorer() {
-        setTitle("Enhanced File Explorer");
+        setTitle("My File Explorer");
         setSize(900, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -27,7 +27,7 @@ public class FileExplorer extends JFrame {
         // Tạo thanh điều hướng (North)
         JPanel navigationPanel = new JPanel(new BorderLayout());
         backButton = new JButton("← Back");
-        backButton.setFont(new Font("Arial", Font.BOLD, 14));
+        backButton.setFont(new Font("Arial", Font.BOLD, 16));
         backButton.addActionListener(e -> {
             if (!directoryStack.isEmpty()) {
                 currentDirectory = directoryStack.pop();
@@ -42,7 +42,7 @@ public class FileExplorer extends JFrame {
     
         pathField = new JTextField("My Computer");
         pathField.setEditable(true); // Cho phép chỉnh sửa
-        pathField.setFont(new Font("Consolas", Font.PLAIN, 14));
+        pathField.setFont(new Font("Consolas", Font.PLAIN, 16));
 
         // Lắng nghe sự kiện Enter
         pathField.addActionListener(e -> {
