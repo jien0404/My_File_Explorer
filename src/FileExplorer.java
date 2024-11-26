@@ -68,7 +68,6 @@ public class FileExplorer extends JFrame {
         navigationPanel.add(pathField, BorderLayout.CENTER);
 
         // Thêm thanh menu tính năng vào phía trên cùng
-        JPanel actionPanel = createActionPanel(); // Tạo thanh chức năng
         JToolBar actionToolBar = createToolBar();
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.add(navigationPanel, BorderLayout.NORTH); // Phần điều hướng
@@ -103,53 +102,6 @@ public class FileExplorer extends JFrame {
         } catch (Exception ex) {
             System.err.println("Failed to apply Look and Feel");
         }
-    }
-
-    private JPanel createActionPanel() {
-        JPanel actionPanel = new JPanel();
-        actionPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        
-        // Tạo các nút chức năng
-        JButton addFolderButton = new JButton("Add Folder");
-        JButton addFileButton = new JButton("Add File");
-        JButton renameButton = new JButton("Rename");
-        JButton deleteButton = new JButton("Delete");
-    
-        // Đặt font chữ và icon
-        Font buttonFont = new Font("Arial", Font.BOLD, 16);
-        addFolderButton.setFont(buttonFont);
-        addFileButton.setFont(buttonFont);
-        renameButton.setFont(buttonFont);
-        deleteButton.setFont(buttonFont);
-
-        addFolderButton.setToolTipText("Create a new folder");
-        addFileButton.setToolTipText("Create a new file");
-        renameButton.setToolTipText("Rename the selected item");
-        deleteButton.setToolTipText("Delete the selected item");
-    
-        // Thêm các nút vào panel
-        actionPanel.add(addFolderButton);
-        actionPanel.add(addFileButton);
-        actionPanel.add(renameButton);
-        actionPanel.add(deleteButton);
-
-        renameButton.setEnabled(false);
-        deleteButton.setEnabled(false);
-
-        // Bật/tắt khi một mục được chọn trong DirectoryTree
-        directoryTree.getTree().addTreeSelectionListener(e -> {
-            boolean isItemSelected = directoryTree.getSelectedNode() != null;
-            renameButton.setEnabled(isItemSelected);
-            deleteButton.setEnabled(isItemSelected);
-        });
-    
-        // Xử lý sự kiện
-        addFolderButton.addActionListener(e -> directoryTree.handleAddFolder());
-        addFileButton.addActionListener(e -> directoryTree.handleAddFile());
-        renameButton.addActionListener(e -> directoryTree.handleRename());
-        deleteButton.addActionListener(e -> directoryTree.handleDelete());
-    
-        return actionPanel;
     }
 
     private JToolBar createToolBar() { 
