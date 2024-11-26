@@ -69,9 +69,10 @@ public class FileExplorer extends JFrame {
 
         // Thêm thanh menu tính năng vào phía trên cùng
         JPanel actionPanel = createActionPanel(); // Tạo thanh chức năng
+        JToolBar actionToolBar = createToolBar();
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.add(navigationPanel, BorderLayout.NORTH); // Phần điều hướng
-        topPanel.add(actionPanel, BorderLayout.SOUTH);    // Thanh chức năng
+        topPanel.add(actionToolBar, BorderLayout.SOUTH);    // Thanh chức năng
 
         // Thêm các thành phần vào JFrame
         getContentPane().setLayout(new BorderLayout());
@@ -150,4 +151,46 @@ public class FileExplorer extends JFrame {
     
         return actionPanel;
     }
+
+    private JToolBar createToolBar() { 
+        JToolBar toolBar = new JToolBar();
+        toolBar.setFloatable(false);
+    
+        JButton addFolderButton = new JButton("Add Folder");
+        JButton addFileButton = new JButton("Add File");
+        JButton renameButton = new JButton("Rename");
+        JButton deleteButton = new JButton("Delete");
+    
+        Font buttonFont = new Font("Arial", Font.BOLD, 14);
+        addFolderButton.setFont(buttonFont);
+        addFileButton.setFont(buttonFont);
+        renameButton.setFont(buttonFont);
+        deleteButton.setFont(buttonFont);
+
+        addFolderButton.setToolTipText("Create a new folder");
+        addFileButton.setToolTipText("Create a new file");
+        renameButton.setToolTipText("Rename the selected item");
+        deleteButton.setToolTipText("Delete the selected item");
+    
+        // // Set button icons
+        // addFolderButton.setIcon(new ImageIcon("/resources/icons/folder.png"));
+        // addFileButton.setIcon(new ImageIcon("/resources/icons/file.png"));
+        // renameButton.setIcon(new ImageIcon("resources\\icons\\rename.png"));
+        // deleteButton.setIcon(new ImageIcon("resources\\icons\\delete.png"));
+    
+        toolBar.add(addFolderButton);
+        toolBar.addSeparator();
+        toolBar.add(addFileButton);
+        toolBar.addSeparator();
+        toolBar.add(renameButton);
+        toolBar.addSeparator();
+        toolBar.add(deleteButton);
+    
+        addFolderButton.addActionListener(e -> directoryTree.handleAddFolder());
+        addFileButton.addActionListener(e -> directoryTree.handleAddFile());
+        renameButton.addActionListener(e -> directoryTree.handleRename());
+        deleteButton.addActionListener(e -> directoryTree.handleDelete());
+    
+        return toolBar;
+    }    
 }
