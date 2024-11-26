@@ -94,6 +94,15 @@ public class DirectoryTree {
         return tree;
     }
 
+    public DefaultMutableTreeNode getSelectedNode() {
+        TreePath selectedPath = tree.getSelectionPath();
+        if (selectedPath == null) {
+            return null;
+        }
+        return (DefaultMutableTreeNode) selectedPath.getLastPathComponent();
+    }
+    
+
     public void updateDirectoryTree(File directory) {
         tree.setModel(new DefaultTreeModel(createTreeNode(directory)));
         if (directory == null) {
@@ -126,7 +135,7 @@ public class DirectoryTree {
         return rootNode;
     }
     
-    private Icon loadIcon(String path, int width, int height) {
+    public Icon loadIcon(String path, int width, int height) {
         try {
             ImageIcon originalIcon = new ImageIcon(getClass().getResource(path));
             Image scaledImage = originalIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
@@ -170,7 +179,7 @@ public class DirectoryTree {
         }
     }
     
-    private void handleAddFolder() {
+    public void handleAddFolder() {
         DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
         if (selectedNode != null) {
             File selectedFile = (File) selectedNode.getUserObject();
@@ -189,7 +198,7 @@ public class DirectoryTree {
         }
     }
     
-    private void handleAddFile() {
+    public void handleAddFile() {
         DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
         if (selectedNode != null) {
             File selectedFile = (File) selectedNode.getUserObject();
@@ -213,7 +222,7 @@ public class DirectoryTree {
     }
     
 
-    private void handleRename() {
+    public void handleRename() {
         DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
         if (selectedNode != null) {
             File selectedFile = (File) selectedNode.getUserObject();
@@ -230,7 +239,7 @@ public class DirectoryTree {
         }
     }
 
-    private void handleDelete() {
+    public void handleDelete() {
         DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
         if (selectedNode != null) {
             File selectedFile = (File) selectedNode.getUserObject();
