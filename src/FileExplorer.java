@@ -19,11 +19,11 @@ public class FileExplorer extends JFrame {
         setLookAndFeel();
 
         directoryStack = new Stack<>();
-    
+
         // Hiển thị danh sách ổ đĩa mặc định (My Computer)
         currentDirectory = null;
         directoryTree = new DirectoryTree(currentDirectory, this);
-    
+
         // Tạo thanh điều hướng (North)
         JPanel navigationPanel = new JPanel(new BorderLayout());
         backButton = new JButton("← Back");
@@ -78,7 +78,6 @@ public class FileExplorer extends JFrame {
         getContentPane().add(topPanel, BorderLayout.NORTH);
         getContentPane().add(new JScrollPane(directoryTree.getTree()), BorderLayout.CENTER);
     }
-    
 
     public void updatePathField(String path) {
         pathField.setText(path);
@@ -96,7 +95,6 @@ public class FileExplorer extends JFrame {
         this.currentDirectory = directory;
     }
     
-
     private void setLookAndFeel() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -151,12 +149,5 @@ public class FileExplorer extends JFrame {
         deleteButton.addActionListener(e -> directoryTree.handleDelete());
     
         return actionPanel;
-    }
-    
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            FileExplorer explorer = new FileExplorer();
-            explorer.setVisible(true);
-        });
     }
 }

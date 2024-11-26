@@ -16,6 +16,18 @@ public class FileOperations {
         }
     }
 
+    public static boolean deleteRecursively(File file) {
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    deleteRecursively(f);
+                }
+            }
+        }
+        return file.delete();
+    }
+
     private static void showErrorDialog(String message, JFrame parent) {
         JOptionPane.showMessageDialog(parent, message, "Error", JOptionPane.ERROR_MESSAGE);
     }

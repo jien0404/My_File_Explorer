@@ -1,6 +1,5 @@
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
@@ -11,7 +10,6 @@ import java.io.File;
 public class DirectoryTree {
     private JTree tree;
     private FileExplorer fileExplorer;
-    private JPopupMenu contextMenu;
 
     public DirectoryTree(File rootDirectory, FileExplorer fileExplorer) {
         this.fileExplorer = fileExplorer;
@@ -28,38 +26,16 @@ public class DirectoryTree {
                 fileExplorer.updatePathField(selectedFile.getAbsolutePath());
             }
         });
-    
-        // Tạo menu ngữ cảnh
-        contextMenu = new JPopupMenu();
-        JMenu addSubMenu = new JMenu("Add New");
-        addSubMenu.setIcon(loadIcon("/resources/icons/add.png", 20, 20));
 
-        JMenuItem addFolderMenuItem = new JMenuItem("Add Folder");
-        addFolderMenuItem.setIcon(loadIcon("/resources/icons/folder.png", 20, 20));
-
-        JMenuItem addFileMenuItem = new JMenuItem("Add File");
-        addFileMenuItem.setIcon(loadIcon("/resources/icons/file.png", 20, 20));
-
-        addSubMenu.add(addFolderMenuItem);
-        addSubMenu.add(addFileMenuItem);
-
-        JMenuItem renameMenuItem = new JMenuItem("Rename");
-        renameMenuItem.setIcon(loadIcon("resources\\icons\\rename.png", 20, 20));
-        JMenuItem deleteMenuItem = new JMenuItem("Delete");
-        deleteMenuItem.setIcon(loadIcon("resources\\icons\\delete.png", 20, 20));
-    
-        contextMenu.add(addSubMenu);
-        contextMenu.add(renameMenuItem);
-        contextMenu.add(deleteMenuItem);
-    
-        // Thêm sự kiện chuột phải
+        // Tạo và thêm menu ngữ cảnh
+        ContextMenu contextMenu = new ContextMenu(this);
         tree.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (SwingUtilities.isRightMouseButton(e)) {
                     int row = tree.getClosestRowForLocation(e.getX(), e.getY());
                     tree.setSelectionRow(row);
-                    contextMenu.show(tree, e.getX(), e.getY());
+                    contextMenu.showMenu(tree, e.getX(), e.getY());
                 }
             }
 
@@ -81,14 +57,7 @@ public class DirectoryTree {
                 }
             }
         });
-    
-        // Xử lý hành động
-        addFolderMenuItem.addActionListener(e -> handleAddFolder());
-        addFileMenuItem.addActionListener(e -> handleAddFile());
-        renameMenuItem.addActionListener(e -> handleRename());
-        deleteMenuItem.addActionListener(e -> handleDelete());
     }
-        
 
     public JTree getTree() {
         return tree;
@@ -101,7 +70,6 @@ public class DirectoryTree {
         }
         return (DefaultMutableTreeNode) selectedPath.getLastPathComponent();
     }
-    
 
     public void updateDirectoryTree(File directory) {
         tree.setModel(new DefaultTreeModel(createTreeNode(directory)));
@@ -109,12 +77,10 @@ public class DirectoryTree {
             fileExplorer.updatePathField("My Computer");
         }
     }
-    
 
     private DefaultMutableTreeNode createTreeNode(File directory) {
         DefaultMutableTreeNode rootNode;
         if (directory == null) {
-            // Hiển thị danh sách ổ đĩa
             rootNode = new DefaultMutableTreeNode("My Computer");
             File[] roots = File.listRoots();
             if (roots != null) {
@@ -123,7 +89,6 @@ public class DirectoryTree {
                 }
             }
         } else {
-            // Hiển thị nội dung thư mục
             rootNode = new DefaultMutableTreeNode(directory);
             File[] files = directory.listFiles();
             if (files != null) {
@@ -133,50 +98,6 @@ public class DirectoryTree {
             }
         }
         return rootNode;
-    }
-    
-    public Icon loadIcon(String path, int width, int height) {
-        try {
-            ImageIcon originalIcon = new ImageIcon(getClass().getResource(path));
-            Image scaledImage = originalIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
-            return new ImageIcon(scaledImage);
-        } catch (Exception e) {
-            System.err.println("Error loading icon: " + path);
-            return null;
-        }
-    }
-    
-
-    // Bộ renderer tùy chỉnh để hiển thị biểu tượng
-    private static class CustomTreeCellRenderer extends DefaultTreeCellRenderer {
-        private final Icon folderIcon = scaleIcon(UIManager.getIcon("FileView.directoryIcon"), 24);
-        private final Icon fileIcon = scaleIcon(UIManager.getIcon("FileView.fileIcon"), 24);
-    
-        // Phương thức scale icon
-        private static Icon scaleIcon(Icon icon, int size) {
-            if (icon instanceof ImageIcon) {
-                Image img = ((ImageIcon) icon).getImage();
-                Image newImg = img.getScaledInstance(size, size, Image.SCALE_SMOOTH); // Scale icon
-                return new ImageIcon(newImg);
-            }
-            return icon;
-        }
-    
-        @Override
-        public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-            Component c = super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-    
-            // Lấy thông tin node để hiển thị icon phù hợp
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-            if (node.getUserObject() instanceof File file) {
-                if (file.isDirectory()) {
-                    setIcon(folderIcon); // Icon thư mục
-                } else {
-                    setIcon(fileIcon); // Icon tập tin
-                }
-            }
-            return c;
-        }
     }
     
     public void handleAddFolder() {
@@ -264,7 +185,7 @@ public class DirectoryTree {
             File selectedFile = (File) selectedNode.getUserObject();
             int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
-                if (deleteRecursively(selectedFile)) {
+                if (FileOperations.deleteRecursively(selectedFile)) {
                     JOptionPane.showMessageDialog(null, "Deleted successfully!");
                     updateDirectoryTree(fileExplorer.getCurrentDirectory());
                 } else {
@@ -273,17 +194,4 @@ public class DirectoryTree {
             }
         }
     }
-    
-    private boolean deleteRecursively(File file) {
-        if (file.isDirectory()) {
-            File[] files = file.listFiles();
-            if (files != null) {
-                for (File f : files) {
-                    deleteRecursively(f);
-                }
-            }
-        }
-        return file.delete();
-    }
-    
 }
