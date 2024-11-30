@@ -16,7 +16,7 @@ public class DirectoryTree {
         tree = new JTree(createTreeNode(rootDirectory));
         tree.setFont(new Font("Arial", Font.PLAIN, 18));
         tree.setRowHeight(30);
-        tree.setCellRenderer(new CustomTreeCellRenderer());
+        tree.setCellRenderer(new CustomTree());
 
         // Thêm các sự kiện
         tree.addTreeSelectionListener(e -> {

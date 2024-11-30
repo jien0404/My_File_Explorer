@@ -4,7 +4,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import java.awt.*;
 import java.io.File;
 
-public class CustomTreeCellRenderer extends DefaultTreeCellRenderer {
+public class CustomTree extends DefaultTreeCellRenderer {
     private final Icon folderIcon = scaleIcon(UIManager.getIcon("FileView.directoryIcon"), 24);
     private final Icon fileIcon = scaleIcon(UIManager.getIcon("FileView.fileIcon"), 24);
 
