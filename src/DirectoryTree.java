@@ -10,10 +10,13 @@ import java.io.File;
 public class DirectoryTree {
     private JTree tree;
     private FileExplorer fileExplorer;
+    private DefaultMutableTreeNode rootNode;
 
     public DirectoryTree(File rootDirectory, FileExplorer fileExplorer) {
         this.fileExplorer = fileExplorer;
-        tree = new JTree(createTreeNode(rootDirectory));
+        rootNode = createTreeNode(rootDirectory);
+        tree = new JTree(rootNode);
+        // tree = new JTree(createTreeNode(rootDirectory));
         tree.setFont(new Font("Arial", Font.PLAIN, 18));
         tree.setRowHeight(30);
         tree.setCellRenderer(new CustomTree());
@@ -191,6 +194,32 @@ public class DirectoryTree {
                 } else {
                     JOptionPane.showMessageDialog(null, "Failed to delete.");
                 }
+            }
+        }
+    }
+
+    public void filterFiles(String searchTerm) {
+        DefaultMutableTreeNode newRootNode = new DefaultMutableTreeNode("Search Results");
+        filterFilesRecursively(rootNode, newRootNode, searchTerm);
+        
+        if (newRootNode.getChildCount() == 0) {
+            newRootNode.add(new DefaultMutableTreeNode("No results found."));
+        }
+        
+        tree.setModel(new DefaultTreeModel(newRootNode));
+    }
+
+    private void filterFilesRecursively(DefaultMutableTreeNode currentNode, DefaultMutableTreeNode newRootNode, String searchTerm) {
+        for (int i = 0; i < currentNode.getChildCount(); i++) {
+            DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) currentNode.getChildAt(i);
+            File file = (File) childNode.getUserObject();
+            // Kiểm tra tên file
+            if (file.getName().toLowerCase().contains(searchTerm.toLowerCase())) {
+                newRootNode.add(new DefaultMutableTreeNode(file));
+            }
+            // Nếu là thư mục, tìm kiếm đệ quy
+            if (file.isDirectory()) {
+                filterFilesRecursively(childNode, newRootNode, searchTerm);
             }
         }
     }

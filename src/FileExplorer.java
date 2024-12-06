@@ -10,6 +10,10 @@ public class FileExplorer extends JFrame {
     private JButton backButton;
     private Stack<File> directoryStack;
     private File currentDirectory;
+    private JTextField searchField;
+    private JButton searchButton;
+
+    private boolean isSearching = false;
 
     public FileExplorer() {
         setTitle("My File Explorer");
@@ -44,6 +48,41 @@ public class FileExplorer extends JFrame {
         pathField.setEditable(true); // Cho phép chỉnh sửa
         pathField.setFont(new Font("Consolas", Font.PLAIN, 16));
 
+        // Hộp tìm kiếm
+        searchField = new JTextField(20);
+        searchField.setFont(new Font("Consolas", Font.PLAIN, 16));
+        searchField.addActionListener(e -> {
+            if (isSearching) {
+                // Nếu đang trong chế độ tìm kiếm, thoát khỏi tìm kiếm
+                exitSearchMode();
+            } else {
+                // Nếu không, thực hiện tìm kiếm
+                searchFiles(searchField.getText());
+            }
+        });
+
+        // Nút tìm kiếm với biểu tượng
+        ImageIcon searchIcon = new ImageIcon(getClass().getResource("resources\\icons\\search_icon.png"));
+        Image scaledSearchIcon = searchIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+        searchButton = new JButton(new ImageIcon(scaledSearchIcon));
+        searchButton.setPreferredSize(new Dimension(30, 30));
+
+        // Bỏ nền và đường viền
+        searchButton.setContentAreaFilled(false);
+        searchButton.setBorderPainted(false);
+        searchButton.setFocusPainted(false); // Bỏ viền khi nút được chọn
+        searchButton.setFocusable(false); // Bỏ khả năng tiêu điểm
+
+        searchButton.addActionListener(e -> {
+            if (isSearching) {
+                // Nếu đang trong chế độ tìm kiếm, thoát khỏi tìm kiếm
+                exitSearchMode();
+            } else {
+                // Nếu không, thực hiện tìm kiếm
+                searchFiles(searchField.getText());
+            }
+        });
+
         // Lắng nghe sự kiện Enter
         pathField.addActionListener(e -> {
             String enteredPath = pathField.getText().trim();
@@ -64,8 +103,14 @@ public class FileExplorer extends JFrame {
             }
         });
 
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        searchPanel.add(new JLabel("Search:"));
+        searchPanel.add(searchField);
+        searchPanel.add(searchButton);
+        
         navigationPanel.add(backButton, BorderLayout.WEST);
         navigationPanel.add(pathField, BorderLayout.CENTER);
+        navigationPanel.add(searchPanel, BorderLayout.EAST); // Thêm hộp tìm kiếm
 
         // Thêm thanh menu tính năng vào phía trên cùng
         JToolBar actionToolBar = createToolBar();
@@ -77,6 +122,24 @@ public class FileExplorer extends JFrame {
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(topPanel, BorderLayout.NORTH);
         getContentPane().add(new JScrollPane(directoryTree.getTree()), BorderLayout.CENTER);
+    }
+
+    private void searchFiles(String searchTerm) {
+        directoryTree.filterFiles(searchTerm);
+        // Đổi icon thành icon exit
+        ImageIcon searchIcon = new ImageIcon(getClass().getResource("resources\\icons\\exit.png"));
+        Image scaledSearchIcon = searchIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+        searchButton.setIcon(new ImageIcon(scaledSearchIcon));
+        isSearching = true; // Đánh dấu là đang tìm kiếm
+    }
+
+    private void exitSearchMode() {
+        searchField.setText(""); // Xóa nội dung hộp tìm kiếm
+        directoryTree.updateDirectoryTree(currentDirectory); // Quay lại thư mục trước đó
+        ImageIcon searchIcon = new ImageIcon(getClass().getResource("resources\\icons\\search_icon.png"));
+        Image scaledSearchIcon = searchIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+        searchButton.setIcon(new ImageIcon(scaledSearchIcon));
+        isSearching = false; // Đánh dấu là không còn tìm kiếm
     }
 
     public void updatePathField(String path) {
