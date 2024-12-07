@@ -51,21 +51,13 @@ public class FileExplorer extends JFrame {
         // Hộp tìm kiếm
         searchField = new JTextField(20);
         searchField.setFont(new Font("Consolas", Font.PLAIN, 16));
-        searchField.addActionListener(e -> {
-            if (isSearching) {
-                // Nếu đang trong chế độ tìm kiếm, thoát khỏi tìm kiếm
-                exitSearchMode();
-            } else {
-                // Nếu không, thực hiện tìm kiếm
-                searchFiles(searchField.getText());
-            }
-        });
+        searchField.addActionListener(e -> {searchFiles(searchField.getText());});
 
         // Nút tìm kiếm với biểu tượng
         ImageIcon searchIcon = new ImageIcon(getClass().getResource("resources\\icons\\search_icon.png"));
-        Image scaledSearchIcon = searchIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+        Image scaledSearchIcon = searchIcon.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH);
         searchButton = new JButton(new ImageIcon(scaledSearchIcon));
-        searchButton.setPreferredSize(new Dimension(30, 30));
+        searchButton.setPreferredSize(new Dimension(24, 24));
 
         // Bỏ nền và đường viền
         searchButton.setContentAreaFilled(false);
@@ -128,7 +120,7 @@ public class FileExplorer extends JFrame {
         directoryTree.filterFiles(searchTerm);
         // Đổi icon thành icon exit
         ImageIcon searchIcon = new ImageIcon(getClass().getResource("resources\\icons\\exit.png"));
-        Image scaledSearchIcon = searchIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+        Image scaledSearchIcon = searchIcon.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH);
         searchButton.setIcon(new ImageIcon(scaledSearchIcon));
         isSearching = true; // Đánh dấu là đang tìm kiếm
     }
@@ -137,7 +129,7 @@ public class FileExplorer extends JFrame {
         searchField.setText(""); // Xóa nội dung hộp tìm kiếm
         directoryTree.updateDirectoryTree(currentDirectory); // Quay lại thư mục trước đó
         ImageIcon searchIcon = new ImageIcon(getClass().getResource("resources\\icons\\search_icon.png"));
-        Image scaledSearchIcon = searchIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+        Image scaledSearchIcon = searchIcon.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH);
         searchButton.setIcon(new ImageIcon(scaledSearchIcon));
         isSearching = false; // Đánh dấu là không còn tìm kiếm
     }

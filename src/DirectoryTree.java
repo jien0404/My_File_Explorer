@@ -199,8 +199,9 @@ public class DirectoryTree {
     }
 
     public void filterFiles(String searchTerm) {
+        File currentDirectory = fileExplorer.getCurrentDirectory();
         DefaultMutableTreeNode newRootNode = new DefaultMutableTreeNode("Search Results");
-        filterFilesRecursively(rootNode, newRootNode, searchTerm);
+        filterFilesRecursively(createTreeNode(currentDirectory), newRootNode, searchTerm);
         
         if (newRootNode.getChildCount() == 0) {
             newRootNode.add(new DefaultMutableTreeNode("No results found."));
@@ -208,18 +209,24 @@ public class DirectoryTree {
         
         tree.setModel(new DefaultTreeModel(newRootNode));
     }
-
+    
     private void filterFilesRecursively(DefaultMutableTreeNode currentNode, DefaultMutableTreeNode newRootNode, String searchTerm) {
         for (int i = 0; i < currentNode.getChildCount(); i++) {
             DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) currentNode.getChildAt(i);
             File file = (File) childNode.getUserObject();
-            // Kiểm tra tên file
-            if (file.getName().toLowerCase().contains(searchTerm.toLowerCase())) {
+            
+            // Mở rộng điều kiện tìm kiếm
+            boolean matchName = file.getName().toLowerCase().contains(searchTerm.toLowerCase());
+            boolean matchParent = file.getParentFile() != null && 
+                                   file.getParentFile().getName().toLowerCase().contains(searchTerm.toLowerCase());
+            
+            if (matchName || matchParent) {
                 newRootNode.add(new DefaultMutableTreeNode(file));
             }
+            
             // Nếu là thư mục, tìm kiếm đệ quy
             if (file.isDirectory()) {
-                filterFilesRecursively(childNode, newRootNode, searchTerm);
+                filterFilesRecursively(createTreeNode(file), newRootNode, searchTerm);
             }
         }
     }
