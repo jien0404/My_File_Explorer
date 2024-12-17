@@ -175,7 +175,7 @@ public class FileExplorer extends JFrame {
 
     // Tìm kiếm files
     private void searchFiles(String searchTerm) {
-        if (searchTerm.equals("Search files and folders...")) return;
+        if (searchTerm.equals("Files and folders...")) return;
         
         directoryTree.filterFiles(searchTerm);
         searchButton.setText("✖");
@@ -184,7 +184,7 @@ public class FileExplorer extends JFrame {
 
     // Thoát chế độ tìm kiếm
     private void exitSearchMode() {
-        searchField.setText("Search files and folders...");
+        searchField.setText("Files and folders...");
         searchField.setForeground(Color.GRAY);
         directoryTree.updateDirectoryTree(currentDirectory);
         searchButton.setText("🔍");
