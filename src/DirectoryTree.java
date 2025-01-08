@@ -215,12 +215,10 @@ public class DirectoryTree {
             DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) currentNode.getChildAt(i);
             File file = (File) childNode.getUserObject();
             
-            // Mở rộng điều kiện tìm kiếm
+            // Tìm kiếm chỉ theo tên tệp
             boolean matchName = file.getName().toLowerCase().contains(searchTerm.toLowerCase());
-            boolean matchParent = file.getParentFile() != null && 
-                                   file.getParentFile().getName().toLowerCase().contains(searchTerm.toLowerCase());
             
-            if (matchName || matchParent) {
+            if (matchName) {
                 newRootNode.add(new DefaultMutableTreeNode(file));
             }
             

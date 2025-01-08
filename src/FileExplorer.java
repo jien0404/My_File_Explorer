@@ -184,7 +184,7 @@ public class FileExplorer extends JFrame {
 
     // Thoát chế độ tìm kiếm
     private void exitSearchMode() {
-        searchField.setText("Files and folders...");
+        // searchField.setText("Files and folders...");
         searchField.setForeground(Color.GRAY);
         directoryTree.updateDirectoryTree(currentDirectory);
         searchButton.setText("🔍");
